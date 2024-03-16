@@ -9,7 +9,7 @@
 
 float normalDistribution(float, float, float, float);
 float freqToNum(float);
-
+void func_callback(void *, Uint8 *, int);
 
 int soundGen(int freq, float dur) {
     SDL_Init(SDL_INIT_AUDIO);
@@ -21,7 +21,7 @@ int soundGen(int freq, float dur) {
     SDL_AudioSpec audio_spec;
     SDL_zero(audio_spec);
     audio_spec.freq = FREQ;
-    audio_spec.format = AUDIO_S16SYS;
+    audio_spec.format = AUDIO_S16;
     audio_spec.channels = 1;
     audio_spec.samples = 1024;
     audio_spec.callback = NULL;
@@ -38,7 +38,7 @@ int soundGen(int freq, float dur) {
         // note: "5000" here is just gain so that we will hear something
 	//printf("%f, %d\n", (1/(i+0.0001)-0.00001), )((-i+(44100*3))/14);
 	//printf("%f\n", freqToNum(freq));
-	int16_t sample = (sin(x * freqToNum(freq)) * (-0.5*i+(audio_spec.freq*dur))/10);
+	int16_t sample = (sin(x * freqToNum(freq)) * (-i+(audio_spec.freq*dur)));
 
 	//for (int j = 500; j < 1500; j += 50){
         //	sample += (sin(x * freqToNum(j)) * normalDistribution(0.4,100,1000,j)*((-i+(44100))/10))/5;
@@ -69,4 +69,11 @@ float freqToNum(float freq){
 	float ans = 2*M_PI/((1/freq)*441);
 	return ans;
 
+}
+
+void func_callback(void *unused, Uint8 *stream, int len) {
+
+    for (int i=0;i<len;i++) {
+        stream[i] = i;
+    }
 }

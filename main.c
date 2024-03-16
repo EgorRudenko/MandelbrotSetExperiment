@@ -13,6 +13,9 @@
 int lastTime = 0;		//lastRefresh it is needed for timer (refresh rate aka fps)
 int mandelbrotMap[W][H];
 int durations[W];
+int toRender = 1;
+int sy = 0;
+int sx = 0;
 
 void renderScene(void);		//practically rendering
 void idleFunction();		//refreshing
@@ -60,13 +63,13 @@ generateMandelbrotSet(int map[W][H]){
 		z.r = 0;
 		z.i = 0;
 		for (int i = 1; i < 1000; i++){
-
 			//printf("%f, %f \n",z.r, z.i);
 			if (abs(z.i) + abs(z.r) > 2.5) {map[x][y] = i;break;}
 			double im = z.i;
 			//printf("%f\n", z.i);
 			double re = z.r;
 			z.r = -im*im + re*re + num.r;
+	for (int x = 0; x < W; x += 10) for (int y = 0; y< H; y+= 10){
 			z.i = im*re + im*re + num.i;
 		}
 		//printf("%f %f\n", z.i-num.i, z.r-num.r);
@@ -74,7 +77,7 @@ generateMandelbrotSet(int map[W][H]){
 			map[x][y] = 0;
 		}
 	}}
-}
+}}
 
 
 void 
@@ -82,10 +85,11 @@ renderScene(void){
 	//printf("change");
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
-	float firstR = (float)rand()/2147483647.0f;
-	float secondR = (float)rand()/2147483647.0f;
-	float thirdR = (float)rand()/2147483647.0f;
+	//float firstR = (float)rand()/2147483647.0f;
+	//float secondR = (float)rand()/2147483647.0f;
+	//float thirdR = (float)rand()/2147483647.0f;
 	//printf("%f\n", firstR);
+
 	for (int x = 0; x < W; x++){
 		for (int y = 0; y < H; y++){		
 			glBegin(GL_POINTS);
@@ -105,18 +109,22 @@ renderScene(void){
 
 void 
 idleFunction(){
+	if (sx+30 >= W){
+		sx = 0;
+		sy += 30;
+	} else {
+		sx+=30;
+	}
+	if (!mandelbrotMap[sx][sy]){
+		soundGen(30, 5);
+	}else{
+		soundGen(mandelbrotMap[sx][sy]*100, 0.5);
+	}
 	int time = glutGet(GLUT_ELAPSED_TIME);
 	int diff = time- lastTime;
 	if (diff > refreshRate){
 		glutPostRedisplay();
 		lastTime = glutGet(GLUT_ELAPSED_TIME);
-	}
-	for (int x = 0; x < W; x += 10) for (int y = 0; y< H; y+= 10){
-		if (!mandelbrotMap[x][y]){
-			soundGen(30, durations[x]*5);
-		}else{
-			soundGen(mandelbrotMap[x][y]*100, durations[x]);
-		}
 	}
 }
 
@@ -134,3 +142,6 @@ genDur(int dst[W], int src[W][H])
 		dst[x] = counter/H;
 	}
 }
+
+
+
