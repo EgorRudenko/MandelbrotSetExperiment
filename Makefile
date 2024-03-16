@@ -2,7 +2,7 @@ CC?=gcc
 PKG_CONFIG?=pkg-config
 
 CFLAGS?=-g -O2 -Wall
-LDFLAGS?=
+LDFLAGS?=-L. soundlib.c -lm
 
 PREFIX?=/usr/local
 DESTDIR?=
@@ -19,8 +19,8 @@ ifeq ($(UNAME_S),Linux)
 endif
 
 
-#CFLAGS+=$(shell $(PKG_CONFIG) GL --cflags)
-#LDFLAGS+=$(shell $(PKG_CONFIG) GL --libs)
+CFLAGS+=$(shell $(PKG_CONFIG) sdl2 --cflags)
+LDFLAGS+=$(shell $(PKG_CONFIG) sdl2 --libs)
 
 CFLAGS+=$(shell $(PKG_CONFIG) glut --cflags)
 LDFLAGS+=$(shell $(PKG_CONFIG) glut --libs)

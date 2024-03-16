@@ -2,19 +2,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include "soundlib.h"
+
 
 #define refreshRate 100		//not really a refresh rate, but rather pause between refreshing
-#define W 1920			//basic window width (I don't recommend changing it, rendering will break)
-#define H 1080			//basic window height - " -
+#define W 1500			//basic window width (I don't recommend changing it, rendering will break)
+#define H 1000			//basic window height - " -
 
 
 int lastTime = 0;		//lastRefresh it is needed for timer (refresh rate aka fps)
 int mandelbrotMap[W][H];
-
+int durations[W];
 
 void renderScene(void);		//practically rendering
 void idleFunction();		//refreshing
 void generateMandelbrotSet(int[W][H]);
+void genDur(int[W], int[W][H]);
+
 
 struct complexNumber {
 	double r;
@@ -29,7 +33,9 @@ void resize(int width, int height) {
 }
 
 int main(int argc, char** argv){
+	//soundGen(200);
 	generateMandelbrotSet(mandelbrotMap);
+	genDur(durations, mandelbrotMap);
 	glutInit(&argc, argv);						//guess
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);	//I have also no idea
 	glutInitWindowPosition(100,100);
@@ -42,7 +48,8 @@ int main(int argc, char** argv){
 	return 1;
 }
 
-void generateMandelbrotSet(int map[W][H]){
+void 
+generateMandelbrotSet(int map[W][H]){
 	for (int x = 0; x < W; x++){
 		for (int y = 0; y < H; y++){
 		struct complexNumber num;
@@ -70,7 +77,8 @@ void generateMandelbrotSet(int map[W][H]){
 }
 
 
-void renderScene(void){
+void 
+renderScene(void){
 	//printf("change");
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -78,28 +86,51 @@ void renderScene(void){
 	float secondR = (float)rand()/2147483647.0f;
 	float thirdR = (float)rand()/2147483647.0f;
 	//printf("%f\n", firstR);
-	for (int i = 0; i < W; i++){
-		for (int j = 0; j < H; j++){		
+	for (int x = 0; x < W; x++){
+		for (int y = 0; y < H; y++){		
 			glBegin(GL_POINTS);
-				if (mandelbrotMap[i][j] == 0){
+				if (mandelbrotMap[x][y] == 0){
 					glColor3f(0.0f,0.0f,0.0f);
 				} else {
 					//printf("%d\n",mandelbrotMap[i][j]);
-					glColor3f(0.5f,(float)mandelbrotMap[i][j]/20,(float)mandelbrotMap[i][j]/10);
+					glColor3f(0.5f,(float)mandelbrotMap[x][y]/20,(float)mandelbrotMap[x][y]/10);
 				}
 				//glColor3f((double)i/(double)W, (double)j/(double)H, 0.5f);
-				glVertex2f((float)i/(float)W*2.0f-1,(float)j/(float)H*2.0f-1);
+				glVertex2f((float)x/(float)W*2.0f-1,(float)y/(float)H*2.0f-1);
 			glEnd();
 		}
 	}
 	glutSwapBuffers(); 
 }
 
-void idleFunction(){
+void 
+idleFunction(){
 	int time = glutGet(GLUT_ELAPSED_TIME);
 	int diff = time- lastTime;
 	if (diff > refreshRate){
 		glutPostRedisplay();
 		lastTime = glutGet(GLUT_ELAPSED_TIME);
+	}
+	for (int x = 0; x < W; x += 10) for (int y = 0; y< H; y+= 10){
+		if (!mandelbrotMap[x][y]){
+			soundGen(30, durations[x]*5);
+		}else{
+			soundGen(mandelbrotMap[x][y]*100, durations[x]);
+		}
+	}
+}
+
+
+void 
+genDur(int dst[W], int src[W][H])
+{
+	for (int x = 0; x < W; x++) {
+		int counter = 0;
+		for (int y = 0; y < H; y++){
+			if (src[x][y] == 0){
+				counter++;
+			}
+		}
+		dst[x] = counter/H;
 	}
 }

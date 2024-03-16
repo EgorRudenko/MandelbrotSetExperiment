@@ -1,0 +1,1 @@
+int soundGen(int, float);
