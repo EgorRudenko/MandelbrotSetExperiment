@@ -1,1 +1,1 @@
-int soundGen(int, float);
+int soundGen(int[][1000], int);

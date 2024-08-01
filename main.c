@@ -12,15 +12,15 @@
 
 int lastTime = 0;		//lastRefresh it is needed for timer (refresh rate aka fps)
 int mandelbrotMap[W][H];
-int durations[W];
+int freqs[W][H];
 int toRender = 1;
 int sy = 0;
-int sx = 0;
+int sx = 600;
 
 void renderScene(void);		//practically rendering
 void idleFunction();		//refreshing
 void generateMandelbrotSet(int[W][H]);
-void genDur(int[W], int[W][H]);
+void genFreqs(int[W][H], int[W][H]);
 
 
 struct complexNumber {
@@ -38,7 +38,7 @@ void resize(int width, int height) {
 int main(int argc, char** argv){
 	//soundGen(200);
 	generateMandelbrotSet(mandelbrotMap);
-	genDur(durations, mandelbrotMap);
+	genFreqs(freqs, mandelbrotMap);
 	glutInit(&argc, argv);						//guess
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);	//I have also no idea
 	glutInitWindowPosition(100,100);
@@ -64,6 +64,7 @@ generateMandelbrotSet(int map[W][H]){
 		z.i = 0;
 		for (int i = 1; i < 1000; i++){
 			//printf("%f, %f \n",z.r, z.i);
+			//if (abs(z.i) + abs(z.r) > 2.5) {map[x][y] = i;break;}
 			if (abs(z.i) + abs(z.r) > 2.5) {map[x][y] = i;break;}
 			double im = z.i;
 			//printf("%f\n", z.i);
@@ -109,37 +110,33 @@ renderScene(void){
 
 void 
 idleFunction(){
-	if (sx+30 >= W){
-		sx = 0;
-		sy += 30;
-	} else {
-		sx+=30;
-	}
-	if (!mandelbrotMap[sx][sy]){
-		soundGen(30, 5);
-	}else{
-		soundGen(mandelbrotMap[sx][sy]*100, 0.5);
-	}
-	int time = glutGet(GLUT_ELAPSED_TIME);
-	int diff = time- lastTime;
-	if (diff > refreshRate){
-		glutPostRedisplay();
-		lastTime = glutGet(GLUT_ELAPSED_TIME);
+	//printf("%d\n", freqs[sx][500]);
+	soundGen(freqs, H);
+	if (toRender){
+		int time = glutGet(GLUT_ELAPSED_TIME);
+		int diff = time- lastTime;
+		if (diff > refreshRate){
+			glutPostRedisplay();
+			lastTime = glutGet(GLUT_ELAPSED_TIME);
+		}
+		toRender = 0;
+
 	}
 }
 
 
 void 
-genDur(int dst[W], int src[W][H])
+genFreqs(int dst[W][H], int src[W][H])
 {
-	for (int x = 0; x < W; x++) {
-		int counter = 0;
-		for (int y = 0; y < H; y++){
-			if (src[x][y] == 0){
-				counter++;
+	for (int x = 0; x < W; x++){
+		for (int y = 0; y < H; y++) {
+			if (mandelbrotMap[x][y] == 0){
+				dst[x][y] = 1;
+				//dst[x][y] = y+100;
+			}else {
+				dst[x][y] = 0;
 			}
 		}
-		dst[x] = counter/H;
 	}
 }
 
